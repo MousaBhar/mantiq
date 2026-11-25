@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', 'Mantiq - Categories Management')
 
-@section('content')
+@section('admin-content')
 
 <style>
     .category-actions {
@@ -69,272 +69,185 @@
     }
 </style>
 
-<div class="admin-layout">
+<header class="admin-header">
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
+    <div>
+        <h1>Categories Management</h1>
+        <p>Manage your platform categories.</p>
+    </div>
 
-        <div class="admin-brand">
-            <span class="brand-icon">M</span>
-            <span>MANTIQ</span>
+    <div class="admin-profile">
+        <div class="profile-avatar">M</div>
+
+        <div>
+            <strong>{{ auth()->user()->name }}</strong>
+            <span>Administrator</span>
+        </div>
+    </div>
+
+</header>
+
+<section class="categories-section">
+
+    <div class="section-heading">
+
+        <div>
+            <h2>All Categories</h2>
+            <p>View and manage existing categories.</p>
         </div>
 
-        <div class="sidebar-section">
-            <p class="sidebar-label">MAIN MENU</p>
+        <a href="{{ route('admin.categories.create') }}"
+           class="category-add-button">
+            + Add Category
+        </a>
 
-            <a href="{{ route('admin.dashboard') }}"
-               class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <span>▦</span> Dashboard
-            </a>
+    </div>
 
-            <a href="{{ route('admin.users.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <span>♙</span> Users
-            </a>
-
-            <a href="{{ route('admin.categories.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                <span>▤</span> Categories
-            </a>
+    @if(session('success'))
+        <div class="category-success">
+            {{ session('success') }}
         </div>
+    @endif
 
-        <div class="sidebar-section">
-            <p class="sidebar-label">CONTENT MANAGEMENT</p>
+    <!-- Track Filter -->
+    <form method="GET"
+          action="{{ route('admin.categories.index') }}"
+          style="margin-bottom:20px;">
 
-            <a href="{{ route('admin.contents.index', ['track' => 'tech']) }}"
-               class="sidebar-link">
-                <span>⌘</span> Tech Track
-            </a>
+        <label for="track" style="font-weight:600; margin-right:10px;">
+            Filter by Track:
+        </label>
 
-            <a href="{{ route('admin.contents.index', ['track' => 'business']) }}"
-               class="sidebar-link">
-                <span>▣</span> B2B Route
-            </a>
+        <select
+            name="track"
+            id="track"
+            onchange="this.form.submit()"
+            style="padding:10px; border:1px solid #ddd; border-radius:8px;"
+        >
+            <option value="">All Tracks</option>
 
-            <a href="{{ route('admin.contents.index', ['type' => 'podcast']) }}"
-               class="sidebar-link">
-                <span>♫</span> BuildCast
-            </a>
+            <option value="tech"
+                {{ request('track') === 'tech' ? 'selected' : '' }}>
+                Tech
+            </option>
 
-            <a href="#" class="sidebar-link">
-                <span>◉</span> Community
-            </a>
-        </div>
+            <option value="business"
+                {{ request('track') === 'business' ? 'selected' : '' }}>
+                Business
+            </option>
+        </select>
 
-        <div class="sidebar-section">
-            <p class="sidebar-label">SYSTEM</p>
+    </form>
 
-            <a href="#" class="sidebar-link">
-                <span>♧</span> Notifications
-            </a>
+    <!-- Categories Table -->
+    <div class="category-table-wrapper">
 
-            <a href="#" class="sidebar-link">
-                <span>⚙</span> Settings
-            </a>
-        </div>
+        <table class="category-table">
 
-        <div class="sidebar-bottom">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>English Name</th>
+                    <th>Arabic Name</th>
+                    <th>Track</th>
+                    <th>Sort Order</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-                <button type="submit" class="sidebar-link logout-button">
-                    <span>↩</span> Logout
-                </button>
-            </form>
-        </div>
+            <tbody>
 
-    </aside>
+                @forelse($categories as $category)
 
-    <!-- Main Content -->
-    <main class="admin-main">
+                    <tr>
+                        <td>{{ $category->id }}</td>
 
-        <header class="admin-header">
+                        <td>
+                            <strong>{{ $category->name }}</strong>
+                        </td>
 
-            <div>
-                <h1>Categories Management</h1>
-                <p>Manage your platform categories.</p>
-            </div>
+                        <td dir="rtl">
+                            {{ $category->name_ar ?: '—' }}
+                        </td>
 
-            <div class="admin-profile">
-                <div class="profile-avatar">M</div>
+                        <td>
+                            {{ ucfirst($category->track) }}
+                        </td>
 
-                <div>
-                    <strong>{{ auth()->user()->name }}</strong>
-                    <span>Administrator</span>
-                </div>
-            </div>
+                        <td>
+                            {{ $category->sort_order }}
+                        </td>
 
-        </header>
+                        <td>
+                            {{ $category->description ?: 'No description' }}
+                        </td>
 
-        <section class="categories-section">
+                        <td>
+                            @if($category->is_active)
+                                <span class="category-status active">
+                                    Active
+                                </span>
+                            @else
+                                <span class="category-status inactive">
+                                    Inactive
+                                </span>
+                            @endif
+                        </td>
 
-            <div class="section-heading">
+                        <td>
+                            <div class="category-actions">
 
-                <div>
-                    <h2>All Categories</h2>
-                    <p>View and manage existing categories.</p>
-                </div>
+                                <a href="{{ route('admin.categories.show', $category) }}"
+                                   class="category-view-button">
+                                    View
+                                </a>
 
-                <a href="{{ route('admin.categories.create') }}"
-                   class="category-add-button">
-                    + Add Category
-                </a>
+                                <a href="{{ route('admin.categories.edit', $category) }}"
+                                   class="category-edit-button">
+                                    Edit
+                                </a>
 
-            </div>
+                                <form
+                                    action="{{ route('admin.categories.destroy', $category) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this category?')"
+                                >
+                                    @csrf
+                                    @method('DELETE')
 
-            <!-- Success Message -->
-            @if(session('success'))
-                <div class="category-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+                                    <button type="submit"
+                                            class="category-delete-button">
+                                        Delete
+                                    </button>
+                                </form>
 
-            <!-- Track Filter -->
-            <form method="GET"
-                  action="{{ route('admin.categories.index') }}"
-                  style="margin-bottom:20px;">
+                            </div>
+                        </td>
+                    </tr>
 
-                <label for="track" style="font-weight:600; margin-right:10px;">
-                    Filter by Track:
-                </label>
+                @empty
 
-                <select
-                    name="track"
-                    id="track"
-                    onchange="this.form.submit()"
-                    style="padding:10px; border:1px solid #ddd; border-radius:8px;"
-                >
-                    <option value="">All Tracks</option>
+                    <tr>
+                        <td colspan="8" class="category-empty">
+                            No categories found.
+                        </td>
+                    </tr>
 
-                    <option value="tech"
-                        {{ request('track') === 'tech' ? 'selected' : '' }}>
-                        Tech
-                    </option>
+                @endforelse
 
-                    <option value="business"
-                        {{ request('track') === 'business' ? 'selected' : '' }}>
-                        Business
-                    </option>
-                </select>
+            </tbody>
 
-            </form>
+        </table>
 
-            <!-- Categories Table -->
-            <div class="category-table-wrapper">
+    </div>
 
-                <table class="category-table">
+    <!-- Pagination -->
+    <div class="category-pagination">
+        {{ $categories->appends(request()->query())->links() }}
+    </div>
 
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>English Name</th>
-                            <th>Arabic Name</th>
-                            <th>Track</th>
-                            <th>Sort Order</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($categories as $category)
-
-                            <tr>
-                                <td>{{ $category->id }}</td>
-
-                                <td>
-                                    <strong>{{ $category->name }}</strong>
-                                </td>
-
-                                <td dir="rtl">
-                                    {{ $category->name_ar ?: '—' }}
-                                </td>
-
-                                <td>
-                                    {{ ucfirst($category->track) }}
-                                </td>
-
-                                <td>
-                                    {{ $category->sort_order }}
-                                </td>
-
-                                <td>
-                                    {{ $category->description ?: 'No description' }}
-                                </td>
-
-                                <td>
-                                    @if($category->is_active)
-                                        <span class="category-status active">
-                                            Active
-                                        </span>
-                                    @else
-                                        <span class="category-status inactive">
-                                            Inactive
-                                        </span>
-                                    @endif
-                                </td>
-
-                                <td>
-                                    <div class="category-actions">
-
-                                        <!-- View Button -->
-                                        <a href="{{ route('admin.categories.show', $category) }}"
-                                           class="category-view-button">
-                                            View
-                                        </a>
-
-                                        <!-- Edit Button -->
-                                        <a href="{{ route('admin.categories.edit', $category) }}"
-                                           class="category-edit-button">
-                                            Edit
-                                        </a>
-
-                                        <!-- Delete Button -->
-                                        <form
-                                            action="{{ route('admin.categories.destroy', $category) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Are you sure you want to delete this category?')"
-                                        >
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit"
-                                                    class="category-delete-button">
-                                                Delete
-                                            </button>
-                                        </form>
-
-                                    </div>
-                                </td>
-                            </tr>
-
-                        @empty
-
-                            <tr>
-                                <td colspan="8" class="category-empty">
-                                    No categories found.
-                                </td>
-                            </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            <!-- Pagination -->
-            <div class="category-pagination">
-                {{ $categories->appends(request()->query())->links() }}
-            </div>
-
-        </section>
-
-    </main>
-
-</div>
+</section>
 
 @endsection

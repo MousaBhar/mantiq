@@ -1,119 +1,8 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
-@section('content')
-<div class="lesson-page">
+@section('title', 'Mantiq - Edit Lesson')
 
-    <div class="lesson-header">
-        <div>
-            <h1>Edit Lesson</h1>
-            <p>Update lesson details for: <strong>{{ $content->title }}</strong></p>
-        </div>
-
-        <a href="{{ route('admin.contents.lessons.index', $content) }}"
-           class="back-button">
-            Back to Lessons
-        </a>
-    </div>
-
-    <div class="lesson-form-card">
-
-        <form action="{{ route('admin.contents.lessons.update', [$content, $lesson]) }}"
-              method="POST">
-            @csrf
-            @method('PUT')
-
-            <div class="form-group">
-                <label for="title">Lesson Title <span>*</span></label>
-
-                <input type="text"
-                       id="title"
-                       name="title"
-                       value="{{ old('title', $lesson->title) }}"
-                       placeholder="Enter lesson title"
-                       required>
-
-                @error('title')
-                    <small class="error-message">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description</label>
-
-                <textarea id="description"
-                          name="description"
-                          rows="5"
-                          placeholder="Enter lesson description">{{ old('description', $lesson->description) }}</textarea>
-
-                @error('description')
-                    <small class="error-message">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="form-row">
-
-                <div class="form-group">
-                    <label for="sort_order">Lesson Order <span>*</span></label>
-
-                    <input type="number"
-                           id="sort_order"
-                           name="sort_order"
-                           min="0"
-                           value="{{ old('sort_order', $lesson->sort_order) }}"
-                           required>
-
-                    @error('sort_order')
-                        <small class="error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="duration_minutes">Duration (Minutes)</label>
-
-                    <input type="number"
-                           id="duration_minutes"
-                           name="duration_minutes"
-                           min="1"
-                           value="{{ old('duration_minutes', $lesson->duration_minutes) }}"
-                           placeholder="e.g. 30">
-
-                    @error('duration_minutes')
-                        <small class="error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-            </div>
-
-            <div class="form-group">
-                <label for="media_url">Media URL</label>
-
-                <input type="url"
-                       id="media_url"
-                       name="media_url"
-                       value="{{ old('media_url', $lesson->media_url) }}"
-                       placeholder="https://example.com/video">
-
-                @error('media_url')
-                    <small class="error-message">{{ $message }}</small>
-                @enderror
-            </div>
-
-            <div class="form-actions">
-
-                <a href="{{ route('admin.contents.lessons.index', $content) }}"
-                   class="cancel-button">
-                    Cancel
-                </a>
-
-                <button type="submit" class="submit-button">
-                    Update Lesson
-                </button>
-
-            </div>
-
-        </form>
-    </div>
-</div>
+@section('admin-content')
 
 <style>
 .lesson-page {
@@ -239,4 +128,136 @@
     }
 }
 </style>
+
+<div class="lesson-page">
+
+    <div class="lesson-header">
+        <div>
+            <h1>Edit Lesson</h1>
+            <p>
+                Update lesson details for:
+                <strong>{{ $content->title }}</strong>
+            </p>
+        </div>
+
+        <a href="{{ route('admin.contents.lessons.index', $content) }}"
+            class="back-button">
+            Back to Lessons
+        </a>
+    </div>
+
+    <div class="lesson-form-card">
+
+        <form action="{{ route('admin.contents.lessons.update', [$content, $lesson]) }}"
+            method="POST">
+
+            @csrf
+            @method('PUT')
+
+            <div class="form-group">
+                <label for="title">
+                    Lesson Title <span>*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="{{ old('title', $lesson->title) }}"
+                    placeholder="Enter lesson title"
+                    required>
+
+                @error('title')
+                    <small class="error-message">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="5"
+                    placeholder="Enter lesson description">{{ old('description', $lesson->description) }}</textarea>
+
+                @error('description')
+                    <small class="error-message">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="sort_order">
+                        Lesson Order <span>*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        id="sort_order"
+                        name="sort_order"
+                        min="0"
+                        value="{{ old('sort_order', $lesson->sort_order) }}"
+                        required>
+
+                    @error('sort_order')
+                        <small class="error-message">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="duration_minutes">
+                        Duration (Minutes)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="duration_minutes"
+                        name="duration_minutes"
+                        min="1"
+                        value="{{ old('duration_minutes', $lesson->duration_minutes) }}"
+                        placeholder="e.g. 30">
+
+                    @error('duration_minutes')
+                        <small class="error-message">{{ $message }}</small>
+                    @enderror
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="media_url">Media URL</label>
+
+                <input
+                    type="url"
+                    id="media_url"
+                    name="media_url"
+                    value="{{ old('media_url', $lesson->media_url) }}"
+                    placeholder="https://example.com/video">
+
+                @error('media_url')
+                    <small class="error-message">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div class="form-actions">
+
+                <a href="{{ route('admin.contents.lessons.index', $content) }}"
+                    class="cancel-button">
+                    Cancel
+                </a>
+
+                <button type="submit" class="submit-button">
+                    Update Lesson
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
 @endsection

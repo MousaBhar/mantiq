@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', 'Mantiq - Edit Content')
 
-@section('content')
+@section('admin-content')
 
 @php
     $availableTracks = $tracks ?? array_keys(config('mantiq.tracks', []));
@@ -208,389 +208,311 @@
     }
 </style>
 
-<div class="admin-layout">
+<section class="content-form-section">
 
-    <aside class="admin-sidebar">
+    <div class="content-form-header">
+        <h1>Edit Content</h1>
+        <p>Update the information of your existing content.</p>
+    </div>
 
-        <div class="admin-brand">
-            <span class="brand-icon">M</span>
-            <span>MANTIQ</span>
+    @if($errors->any())
+        <div class="content-errors">
+            <strong>Please fix the following errors:</strong>
+
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('admin.contents.update', $content->id) }}"
+        method="POST">
+
+        @csrf
+        @method('PUT')
+
+        {{-- Basic Information --}}
+        <div class="content-form-card">
+
+            <h2>Basic Information</h2>
+            <p class="form-description">
+                Edit the main details of your content.
+            </p>
+
+            <div class="content-form-grid">
+
+                <div class="content-form-group full-width">
+                    <label for="title">Content Title <span>*</span></label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value="{{ old('title', $content->title) }}"
+                        required>
+                </div>
+
+                <div class="content-form-group full-width">
+                    <label for="description">Description</label>
+
+                    <textarea
+                        id="description"
+                        name="description">{{ old('description', $content->description) }}</textarea>
+                </div>
+
+            </div>
         </div>
 
-        <div class="sidebar-section">
-            <p class="sidebar-label">MAIN MENU</p>
+        {{-- Classification --}}
+        <div class="content-form-card">
 
-            <a href="{{ route('admin.dashboard') }}" class="sidebar-link">
-                <span>▦</span> Dashboard
-            </a>
+            <h2>Content Classification</h2>
+            <p class="form-description">
+                Choose the track, type, and category.
+            </p>
 
-            <a href="{{ route('admin.users.index') }}" class="sidebar-link">
-                <span>♙</span> Users
-            </a>
+            <div class="content-form-grid">
 
-            <a href="{{ route('admin.categories.index') }}" class="sidebar-link">
-                <span>▤</span> Categories
-            </a>
+                <div class="content-form-group">
+                    <label for="track">Track</label>
+
+                    <select id="track" name="track">
+
+                        <option value=""
+                            {{ old('track', $content->track) === null ? 'selected' : '' }}>
+                            Podcast Library
+                        </option>
+
+                        @foreach($availableTracks as $track)
+                            <option
+                                value="{{ $track }}"
+                                {{ old('track', $content->track) == $track ? 'selected' : '' }}>
+                                {{ ucfirst($track) }}
+                            </option>
+                        @endforeach
+
+                    </select>
+                </div>
+
+                <div class="content-form-group">
+                    <label for="type">Content Type <span>*</span></label>
+
+                    <select id="type" name="type" required></select>
+                </div>
+
+                <div class="content-form-group full-width">
+                    <label for="category_id">Category</label>
+
+                    <select id="category_id" name="category_id">
+                        <option value="">No Category</option>
+
+                        @foreach($availableCategories as $category)
+                            <option
+                                value="{{ $category->id }}"
+                                data-track="{{ $category->track }}"
+                                {{ old('category_id', $content->category_id) == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+
+                    </select>
+
+                    <div class="content-field-note">
+                        Only categories belonging to the selected track will be available.
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="sidebar-section">
-            <p class="sidebar-label">CONTENT MANAGEMENT</p>
+        {{-- Pricing and Status --}}
+        <div class="content-form-card">
 
-            <a href="{{ route('admin.contents.index', ['track' => 'tech']) }}"
-                class="sidebar-link">
-                <span>⌘</span> Tech Track
-            </a>
+            <h2>Pricing & Status</h2>
+            <p class="form-description">
+                Set the price and publication status.
+            </p>
 
-            <a href="{{ route('admin.contents.index', ['track' => 'business']) }}"
-                class="sidebar-link">
-                <span>▣</span> B2B Route
-            </a>
+            <div class="content-form-grid">
+
+                <div class="content-form-group">
+                    <label for="price">Price</label>
+
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        value="{{ old('price', $content->price) }}"
+                        min="0"
+                        step="0.01">
+                </div>
+
+                <div class="content-form-group">
+                    <label for="status">Status <span>*</span></label>
+
+                    <select id="status" name="status" required>
+                        <option value="draft"
+                            {{ old('status', $content->status) == 'draft' ? 'selected' : '' }}>
+                            Draft
+                        </option>
+
+                        <option value="published"
+                            {{ old('status', $content->status) == 'published' ? 'selected' : '' }}>
+                            Published
+                        </option>
+
+                        <option value="archived"
+                            {{ old('status', $content->status) == 'archived' ? 'selected' : '' }}>
+                            Archived
+                        </option>
+                    </select>
+                </div>
+
+                <div class="content-form-group full-width">
+                    <label class="content-checkbox">
+                        <input
+                            type="checkbox"
+                            name="is_featured"
+                            value="1"
+                            {{ old('is_featured', $content->is_featured) ? 'checked' : '' }}>
+                        Mark this content as Featured
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- Additional Information --}}
+        <div class="content-form-card">
+
+            <h2>Additional Information</h2>
+            <p class="form-description">
+                These fields are optional and depend on the content type.
+            </p>
+
+            <div class="content-form-grid">
+
+                <div class="content-form-group" id="level-group">
+                    <label for="level">Level</label>
+
+                    <select name="level" id="level">
+                        <option value="">Select Level</option>
+
+                        <option value="beginner"
+                            {{ old('level', $content->level) == 'beginner' ? 'selected' : '' }}>
+                            Beginner
+                        </option>
+
+                        <option value="intermediate"
+                            {{ old('level', $content->level) == 'intermediate' ? 'selected' : '' }}>
+                            Intermediate
+                        </option>
+
+                        <option value="advanced"
+                            {{ old('level', $content->level) == 'advanced' ? 'selected' : '' }}>
+                            Advanced
+                        </option>
+                    </select>
+                </div>
+
+                <div class="content-form-group" id="duration-group">
+                    <label for="duration_minutes">Duration (Minutes)</label>
+
+                    <input
+                        type="number"
+                        name="duration_minutes"
+                        id="duration_minutes"
+                        value="{{ old('duration_minutes', $content->duration_minutes) }}"
+                        min="1">
+                </div>
+
+                <div class="content-form-group" id="pages-group">
+                    <label for="pages">Number of Pages</label>
+
+                    <input
+                        type="number"
+                        name="pages"
+                        id="pages"
+                        value="{{ old('pages', $content->pages) }}"
+                        min="1">
+                </div>
+
+                <div class="content-form-group" id="read-minutes-group">
+                    <label for="read_minutes">Reading Time (Minutes)</label>
+
+                    <input
+                        type="number"
+                        name="read_minutes"
+                        id="read_minutes"
+                        value="{{ old('read_minutes', $content->read_minutes) }}"
+                        min="1">
+                </div>
+
+            </div>
+        </div>
+
+        {{-- Media --}}
+        <div class="content-form-card">
+
+            <h2>Media Information</h2>
+            <p class="form-description">
+                Add cover and media references.
+            </p>
+
+            <div class="content-form-grid">
+
+                <div class="content-form-group">
+                    <label for="cover">Cover Image Path</label>
+
+                    <input
+                        type="text"
+                        id="cover"
+                        name="cover"
+                        value="{{ old('cover', $content->cover) }}">
+                </div>
+
+                <div class="content-form-group">
+                    <label for="media_url">Media URL</label>
+
+                    <input
+                        type="url"
+                        id="media_url"
+                        name="media_url"
+                        value="{{ old('media_url', $content->media_url) }}">
+                </div>
+
+                <div class="content-form-group full-width">
+                    <label for="file_path">File Path</label>
+
+                    <input
+                        type="text"
+                        id="file_path"
+                        name="file_path"
+                        value="{{ old('file_path', $content->file_path) }}">
+                </div>
+
+            </div>
+        </div>
+
+        {{-- Actions --}}
+        <div class="content-form-actions">
 
             <a href="{{ route('admin.contents.index') }}"
-                class="sidebar-link active">
-                <span>◫</span> All Contents
+                class="content-cancel-button">
+                Cancel
             </a>
+
+            <button type="submit" class="content-save-button">
+                Update Content
+            </button>
+
         </div>
 
-        <div class="sidebar-bottom">
-            <div class="admin-profile">
-                <div class="profile-avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                </div>
+    </form>
 
-                <div>
-                    <strong>{{ auth()->user()->name ?? 'Admin' }}</strong>
-                    <small>Administrator</small>
-                </div>
-            </div>
-
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="logout-button">
-                    ↪ Logout
-                </button>
-            </form>
-        </div>
-
-    </aside>
-
-    <main class="admin-main">
-
-        <header class="admin-header">
-            <div>
-                <span>Admin Panel / Content Management / Edit Content</span>
-            </div>
-        </header>
-
-        <section class="content-form-section">
-
-            <div class="content-form-header">
-                <h1>Edit Content</h1>
-                <p>Update the information of your existing content.</p>
-            </div>
-
-            @if($errors->any())
-                <div class="content-errors">
-                    <strong>Please fix the following errors:</strong>
-
-                    <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form action="{{ route('admin.contents.update', $content->id) }}"
-                method="POST">
-
-                @csrf
-                @method('PUT')
-
-                {{-- Basic Information --}}
-                <div class="content-form-card">
-
-                    <h2>Basic Information</h2>
-                    <p class="form-description">
-                        Edit the main details of your content.
-                    </p>
-
-                    <div class="content-form-grid">
-
-                        <div class="content-form-group full-width">
-                            <label for="title">Content Title <span>*</span></label>
-
-                            <input
-                                type="text"
-                                id="title"
-                                name="title"
-                                value="{{ old('title', $content->title) }}"
-                                required>
-                        </div>
-
-                        <div class="content-form-group full-width">
-                            <label for="description">Description</label>
-
-                            <textarea
-                                id="description"
-                                name="description">{{ old('description', $content->description) }}</textarea>
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Classification --}}
-                <div class="content-form-card">
-
-                    <h2>Content Classification</h2>
-                    <p class="form-description">
-                        Choose the track, type, and category.
-                    </p>
-
-                    <div class="content-form-grid">
-
-                        <div class="content-form-group">
-                            <label for="track">Track</label>
-
-                            <select id="track" name="track">
-
-                                <option value=""
-                                    {{ old('track', $content->track) === null ? 'selected' : '' }}>
-                                    Podcast Library
-                                </option>
-
-                                @foreach($availableTracks as $track)
-                                    <option
-                                        value="{{ $track }}"
-                                        {{ old('track', $content->track) == $track ? 'selected' : '' }}>
-                                        {{ ucfirst($track) }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-                        </div>
-
-                        <div class="content-form-group">
-                            <label for="type">Content Type <span>*</span></label>
-
-                            <select id="type" name="type" required></select>
-                        </div>
-
-                        <div class="content-form-group full-width">
-                            <label for="category_id">Category</label>
-
-                            <select id="category_id" name="category_id">
-                                <option value="">No Category</option>
-
-                                @foreach($availableCategories as $category)
-                                    <option
-                                        value="{{ $category->id }}"
-                                        data-track="{{ $category->track }}"
-                                        {{ old('category_id', $content->category_id) == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-
-                            <div class="content-field-note">
-                                Only categories belonging to the selected track will be available.
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Pricing and Status --}}
-                <div class="content-form-card">
-
-                    <h2>Pricing & Status</h2>
-                    <p class="form-description">
-                        Set the price and publication status.
-                    </p>
-
-                    <div class="content-form-grid">
-
-                        <div class="content-form-group">
-                            <label for="price">Price</label>
-
-                            <input
-                                type="number"
-                                id="price"
-                                name="price"
-                                value="{{ old('price', $content->price) }}"
-                                min="0"
-                                step="0.01">
-                        </div>
-
-                        <div class="content-form-group">
-                            <label for="status">Status <span>*</span></label>
-
-                            <select id="status" name="status" required>
-                                <option value="draft"
-                                    {{ old('status', $content->status) == 'draft' ? 'selected' : '' }}>
-                                    Draft
-                                </option>
-
-                                <option value="published"
-                                    {{ old('status', $content->status) == 'published' ? 'selected' : '' }}>
-                                    Published
-                                </option>
-
-                                <option value="archived"
-                                    {{ old('status', $content->status) == 'archived' ? 'selected' : '' }}>
-                                    Archived
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="content-form-group full-width">
-                            <label class="content-checkbox">
-                                <input
-                                    type="checkbox"
-                                    name="is_featured"
-                                    value="1"
-                                    {{ old('is_featured', $content->is_featured) ? 'checked' : '' }}>
-                                Mark this content as Featured
-                            </label>
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Additional Information --}}
-                <div class="content-form-card">
-
-                    <h2>Additional Information</h2>
-                    <p class="form-description">
-                        These fields are optional and depend on the content type.
-                    </p>
-
-                    <div class="content-form-grid">
-
-                        <div class="content-form-group" id="level-group">
-                            <label for="level">Level</label>
-
-                            <select name="level" id="level">
-                                <option value="">Select Level</option>
-
-                                <option value="beginner"
-                                    {{ old('level', $content->level) == 'beginner' ? 'selected' : '' }}>
-                                    Beginner
-                                </option>
-
-                                <option value="intermediate"
-                                    {{ old('level', $content->level) == 'intermediate' ? 'selected' : '' }}>
-                                    Intermediate
-                                </option>
-
-                                <option value="advanced"
-                                    {{ old('level', $content->level) == 'advanced' ? 'selected' : '' }}>
-                                    Advanced
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="content-form-group" id="duration-group">
-                            <label for="duration_minutes">Duration (Minutes)</label>
-
-                            <input
-                                type="number"
-                                name="duration_minutes"
-                                id="duration_minutes"
-                                value="{{ old('duration_minutes', $content->duration_minutes) }}"
-                                min="1">
-                        </div>
-
-                        <div class="content-form-group" id="pages-group">
-                            <label for="pages">Number of Pages</label>
-
-                            <input
-                                type="number"
-                                name="pages"
-                                id="pages"
-                                value="{{ old('pages', $content->pages) }}"
-                                min="1">
-                        </div>
-
-                        <div class="content-form-group" id="read-minutes-group">
-                            <label for="read_minutes">Reading Time (Minutes)</label>
-
-                            <input
-                                type="number"
-                                name="read_minutes"
-                                id="read_minutes"
-                                value="{{ old('read_minutes', $content->read_minutes) }}"
-                                min="1">
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Media --}}
-                <div class="content-form-card">
-
-                    <h2>Media Information</h2>
-                    <p class="form-description">
-                        Add cover and media references.
-                    </p>
-
-                    <div class="content-form-grid">
-
-                        <div class="content-form-group">
-                            <label for="cover">Cover Image Path</label>
-
-                            <input
-                                type="text"
-                                id="cover"
-                                name="cover"
-                                value="{{ old('cover', $content->cover) }}">
-                        </div>
-
-                        <div class="content-form-group">
-                            <label for="media_url">Media URL</label>
-
-                            <input
-                                type="url"
-                                id="media_url"
-                                name="media_url"
-                                value="{{ old('media_url', $content->media_url) }}">
-                        </div>
-
-                        <div class="content-form-group full-width">
-                            <label for="file_path">File Path</label>
-
-                            <input
-                                type="text"
-                                id="file_path"
-                                name="file_path"
-                                value="{{ old('file_path', $content->file_path) }}">
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Actions --}}
-                <div class="content-form-actions">
-
-                    <a href="{{ route('admin.contents.index') }}"
-                        class="content-cancel-button">
-                        Cancel
-                    </a>
-
-                    <button type="submit" class="content-save-button">
-                        Update Content
-                    </button>
-
-                </div>
-
-            </form>
-
-        </section>
-
-    </main>
-
-</div>
+</section>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -611,14 +533,6 @@
             book: 'Book',
             article: 'Article'
         };
-
-        const categoryOptions = Array.from(categorySelect.options)
-            .filter(option => option.value !== '')
-            .map(option => ({
-                value: option.value,
-                text: option.text,
-                track: option.dataset.track
-            }));
 
         function updateTypes(selectedType = '') {
 
@@ -658,6 +572,16 @@
             if (selectedTrack === '') {
                 return;
             }
+
+            const categoryOptions = @json(
+                $availableCategories->map(function ($category) {
+                    return [
+                        'value' => (string) $category->id,
+                        'text' => $category->name,
+                        'track' => $category->track,
+                    ];
+                })->values()
+            );
 
             categoryOptions.forEach(function(category) {
 

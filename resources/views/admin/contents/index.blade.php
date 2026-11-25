@@ -1,6 +1,8 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
-@section('content')
+@section('title', 'Mantiq - Content Management')
+
+@section('admin-content')
 
 <style>
     .contents-section {
@@ -383,397 +385,302 @@
     }
 </style>
 
-<div class="admin-layout">
+<section class="contents-section">
 
-    {{-- Sidebar --}}
-    <aside class="admin-sidebar">
+    {{-- Page Heading --}}
+    <div class="contents-header">
 
-        <div class="admin-brand">
-            <div class="brand-icon">M</div>
-            <span>Mantiq</span>
+        <div>
+            <h1>Content Management</h1>
+            <p>Manage and organize all content across Mantiq tracks.</p>
         </div>
 
-        <div class="sidebar-section">
-            <p class="sidebar-label">MAIN MENU</p>
+        <div class="contents-header-actions">
 
-            <a href="{{ route('admin.dashboard') }}" class="sidebar-link">
-                <span>▦</span> Dashboard
-            </a>
-
-            <a href="{{ route('admin.users.index') }}" class="sidebar-link">
-                <span>♙</span> Users
-            </a>
-
-            <a href="{{ route('admin.categories.index') }}" class="sidebar-link">
-                <span>▤</span> Categories
-            </a>
-        </div>
-
-        <div class="sidebar-section">
-            <p class="sidebar-label">CONTENT MANAGEMENT</p>
-
-            <a href="{{ route('admin.contents.index', ['track' => 'tech']) }}"
-               class="sidebar-link {{ request('track') == 'tech' ? 'active' : '' }}">
-                <span>⌘</span> Technical Content
-            </a>
-
-            <a href="{{ route('admin.contents.index', ['track' => 'business']) }}"
-               class="sidebar-link {{ request('track') == 'business' ? 'active' : '' }}">
-                <span>▣</span> Business Content
-            </a>
-
-            <a href="{{ route('admin.contents.index', ['track' => 'podcast_library']) }}"
-               class="sidebar-link {{ request('track') == 'podcast_library' ? 'active' : '' }}">
-                <span>♫</span> Podcast Library
-            </a>
-
-            <a href="{{ route('admin.contents.index') }}"
-               class="sidebar-link {{ !request('track') && !request('type') ? 'active' : '' }}">
-                <span>◫</span> All Contents
-            </a>
-        </div>
-
-        <div class="sidebar-section">
-            <p class="sidebar-label">OTHER</p>
-
-            <a href="{{ route('admin.dashboard') }}" class="sidebar-link">
-                <span>◉</span> Dashboard
-            </a>
-        </div>
-
-        <div class="sidebar-bottom">
-
-            <div class="admin-profile">
-                <div class="profile-avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                </div>
-
-                <div>
-                    <strong>{{ auth()->user()->name ?? 'Admin' }}</strong>
-                    <small>Administrator</small>
-                </div>
+            <div class="contents-count">
+                Total Contents
+                <strong>{{ $contents->total() }}</strong>
             </div>
 
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="logout-button">
-                    ↪ Logout
+            <a href="{{ route('admin.contents.create') }}"
+               class="content-add-button">
+                + Add New Content
+            </a>
+
+        </div>
+
+    </div>
+
+    {{-- Success Message --}}
+    @if(session('success'))
+        <div class="content-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- Filters --}}
+    <div class="contents-filters">
+
+        <h3>Filter Contents</h3>
+
+        <form action="{{ route('admin.contents.index') }}" method="GET">
+
+            <div class="filter-grid">
+
+                <div class="filter-field">
+                    <label for="search">Search by title</label>
+
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search content...">
+                </div>
+
+                <div class="filter-field">
+                    <label for="track">Track / Library</label>
+
+                    <select name="track" id="track">
+
+                        <option value="">All Tracks</option>
+
+                        <option value="tech"
+                            {{ request('track') == 'tech' ? 'selected' : '' }}>
+                            Technical Content
+                        </option>
+
+                        <option value="business"
+                            {{ request('track') == 'business' ? 'selected' : '' }}>
+                            Business Content
+                        </option>
+
+                        <option value="podcast_library"
+                            {{ request('track') == 'podcast_library' ? 'selected' : '' }}>
+                            Podcast Library
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="type">Content Type</label>
+
+                    <select name="type" id="type">
+                        <option value="">All Types</option>
+
+                        @foreach([
+                            'course' => 'Course',
+                            'podcast' => 'Podcast',
+                            'book' => 'Book',
+                            'article' => 'Article'
+                        ] as $value => $label)
+
+                            <option value="{{ $value }}"
+                                {{ request('type') == $value ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="status">Status</label>
+
+                    <select name="status" id="status">
+                        <option value="">All Statuses</option>
+
+                        @foreach($statuses as $status)
+                            <option value="{{ $status }}"
+                                {{ request('status') == $status ? 'selected' : '' }}>
+                                {{ ucfirst($status) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="filter-actions">
+
+                <button type="submit" class="filter-button">
+                    Apply Filters
                 </button>
-            </form>
+
+                <a href="{{ route('admin.contents.index') }}"
+                   class="reset-button">
+                    Reset
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    {{-- Contents Table --}}
+    <div class="contents-table-card">
+
+        <div class="contents-table-heading">
+            <h3>All Contents</h3>
+
+            <span>
+                Showing {{ $contents->count() }}
+                of {{ $contents->total() }} records
+            </span>
+        </div>
+
+        <div class="contents-table-wrapper">
+
+            <table class="contents-table">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Content</th>
+                        <th>Track / Library</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @forelse($contents as $content)
+
+                        <tr>
+
+                            <td>#{{ $content->id }}</td>
+
+                            <td>
+                                <div class="content-title">
+                                    {{ $content->title }}
+                                </div>
+
+                                <div class="content-description">
+                                    {{ \Illuminate\Support\Str::limit($content->description ?? 'No description', 65) }}
+                                </div>
+                            </td>
+
+                            <td>
+                                @if($content->track === 'tech')
+
+                                    <span class="content-badge track-tech">
+                                        Technical Content
+                                    </span>
+
+                                @elseif($content->track === 'business')
+
+                                    <span class="content-badge track-business">
+                                        Business Content
+                                    </span>
+
+                                @elseif($content->track === null && $content->type === 'podcast')
+
+                                    <span class="content-badge track-standalone">
+                                        Podcast Library
+                                    </span>
+
+                                @else
+
+                                    <span class="content-badge track-standalone">
+                                        Standalone
+                                    </span>
+
+                                @endif
+                            </td>
+
+                            <td>
+                                <span class="content-badge type-badge">
+                                    {{ ucfirst($content->type) }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ $content->category?->name ?? '—' }}
+                            </td>
+
+                            <td>
+                                {{ $content->price !== null ? number_format((float) $content->price, 2) : '—' }}
+                            </td>
+
+                            <td>
+                                <span class="content-badge status-{{ $content->status }}">
+                                    {{ ucfirst($content->status) }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ $content->creator?->name ?? '—' }}
+                            </td>
+
+                            <td>
+                                {{ $content->created_at?->format('d M Y') ?? '—' }}
+                            </td>
+
+                            <td>
+                                <div class="content-actions">
+
+                                    <a href="{{ route('admin.contents.show', $content->id) }}"
+                                       class="content-view-button">
+                                        View
+                                    </a>
+
+                                    <a href="{{ route('admin.contents.edit', $content->id) }}"
+                                       class="content-edit-button">
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        action="{{ route('admin.contents.destroy', $content->id) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Are you sure you want to delete this content?');">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit"
+                                                class="content-delete-button">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+                            <td colspan="10" class="contents-empty">
+                                <strong>No Contents Found</strong>
+                                There are no content records matching your filters.
+                            </td>
+                        </tr>
+
+                    @endforelse
+
+                </tbody>
+
+            </table>
 
         </div>
 
-    </aside>
+        <div class="contents-pagination">
+            {{ $contents->links() }}
+        </div>
 
-    {{-- Main Content --}}
-    <main class="admin-main">
+    </div>
 
-        <header class="admin-header">
-            <div>
-                <span>Admin Panel / Content Management</span>
-            </div>
-        </header>
-
-        <section class="contents-section">
-
-            {{-- Page Heading --}}
-            <div class="contents-header">
-
-                <div>
-                    <h1>Content Management</h1>
-                    <p>Manage and organize all content across Mantiq tracks.</p>
-                </div>
-
-                <div class="contents-header-actions">
-
-                    <div class="contents-count">
-                        Total Contents
-                        <strong>{{ $contents->total() }}</strong>
-                    </div>
-
-                    <a href="{{ route('admin.contents.create') }}"
-                       class="content-add-button">
-                        + Add New Content
-                    </a>
-
-                </div>
-
-            </div>
-
-            {{-- Success Message --}}
-            @if(session('success'))
-                <div class="content-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            {{-- Filters --}}
-            <div class="contents-filters">
-
-                <h3>Filter Contents</h3>
-
-                <form action="{{ route('admin.contents.index') }}" method="GET">
-
-                    <div class="filter-grid">
-
-                        <div class="filter-field">
-                            <label for="search">Search by title</label>
-
-                            <input
-                                type="text"
-                                id="search"
-                                name="search"
-                                value="{{ request('search') }}"
-                                placeholder="Search content...">
-                        </div>
-
-                        <div class="filter-field">
-                            <label for="track">Track / Library</label>
-
-                            <select name="track" id="track">
-
-                                <option value="">All Tracks</option>
-
-                                <option value="tech"
-                                    {{ request('track') == 'tech' ? 'selected' : '' }}>
-                                    Technical Content
-                                </option>
-
-                                <option value="business"
-                                    {{ request('track') == 'business' ? 'selected' : '' }}>
-                                    Business Content
-                                </option>
-
-                                <option value="podcast_library"
-                                    {{ request('track') == 'podcast_library' ? 'selected' : '' }}>
-                                    Podcast Library
-                                </option>
-
-                            </select>
-                        </div>
-
-                        <div class="filter-field">
-                            <label for="type">Content Type</label>
-
-                            <select name="type" id="type">
-                                <option value="">All Types</option>
-
-                                @foreach([
-                                    'course' => 'Course',
-                                    'podcast' => 'Podcast',
-                                    'book' => 'Book',
-                                    'article' => 'Article'
-                                ] as $value => $label)
-
-                                    <option value="{{ $value }}"
-                                        {{ request('type') == $value ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="filter-field">
-                            <label for="status">Status</label>
-
-                            <select name="status" id="status">
-                                <option value="">All Statuses</option>
-
-                                @foreach($statuses as $status)
-                                    <option value="{{ $status }}"
-                                        {{ request('status') == $status ? 'selected' : '' }}>
-                                        {{ ucfirst($status) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <div class="filter-actions">
-
-                        <button type="submit" class="filter-button">
-                            Apply Filters
-                        </button>
-
-                        <a href="{{ route('admin.contents.index') }}"
-                           class="reset-button">
-                            Reset
-                        </a>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-            {{-- Contents Table --}}
-            <div class="contents-table-card">
-
-                <div class="contents-table-heading">
-                    <h3>All Contents</h3>
-
-                    <span>
-                        Showing {{ $contents->count() }}
-                        of {{ $contents->total() }} records
-                    </span>
-                </div>
-
-                <div class="contents-table-wrapper">
-
-                    <table class="contents-table">
-
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Content</th>
-                                <th>Track / Library</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Status</th>
-                                <th>Created By</th>
-                                <th>Created Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @forelse($contents as $content)
-
-                                <tr>
-
-                                    <td>#{{ $content->id }}</td>
-
-                                    <td>
-                                        <div class="content-title">
-                                            {{ $content->title }}
-                                        </div>
-
-                                        <div class="content-description">
-                                            {{ \Illuminate\Support\Str::limit($content->description ?? 'No description', 65) }}
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        @if($content->track === 'tech')
-
-                                            <span class="content-badge track-tech">
-                                                Technical Content
-                                            </span>
-
-                                        @elseif($content->track === 'business')
-
-                                            <span class="content-badge track-business">
-                                                Business Content
-                                            </span>
-
-                                        @elseif($content->track === null && $content->type === 'podcast')
-
-                                            <span class="content-badge track-standalone">
-                                                Podcast Library
-                                            </span>
-
-                                        @else
-
-                                            <span class="content-badge track-standalone">
-                                                Standalone
-                                            </span>
-
-                                        @endif
-                                    </td>
-
-                                    <td>
-                                        <span class="content-badge type-badge">
-                                            {{ ucfirst($content->type) }}
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        {{ $content->category?->name ?? '—' }}
-                                    </td>
-
-                                    <td>
-                                        {{ $content->price !== null ? number_format((float) $content->price, 2) : '—' }}
-                                    </td>
-
-                                    <td>
-                                        <span class="content-badge status-{{ $content->status }}">
-                                            {{ ucfirst($content->status) }}
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        {{ $content->creator?->name ?? '—' }}
-                                    </td>
-
-                                    <td>
-                                        {{ $content->created_at?->format('d M Y') ?? '—' }}
-                                    </td>
-
-                                    <td>
-                                        <div class="content-actions">
-
-                                            <a href="{{ route('admin.contents.show', $content->id) }}"
-                                               class="content-view-button">
-                                                View
-                                            </a>
-
-                                            <a href="{{ route('admin.contents.edit', $content->id) }}"
-                                               class="content-edit-button">
-                                                Edit
-                                            </a>
-
-                                            <form
-                                                action="{{ route('admin.contents.destroy', $content->id) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Are you sure you want to delete this content?');">
-
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button type="submit"
-                                                        class="content-delete-button">
-                                                    Delete
-                                                </button>
-
-                                            </form>
-
-                                        </div>
-                                    </td>
-
-                                </tr>
-
-                            @empty
-
-                                <tr>
-                                    <td colspan="10" class="contents-empty">
-                                        <strong>No Contents Found</strong>
-                                        There are no content records matching your filters.
-                                    </td>
-                                </tr>
-
-                            @endforelse
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-                <div class="contents-pagination">
-                    {{ $contents->links() }}
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-</div>
+</section>
 
 {{-- Dynamic Content Type Filter --}}
 <script>
@@ -798,7 +705,6 @@
 
             let availableTypes = allTypes;
 
-            // Podcast Library contains standalone podcasts only.
             if (selectedTrack === 'podcast_library') {
 
                 availableTypes = [
@@ -844,7 +750,6 @@
 
             } else if (selectedTrack === 'podcast_library') {
 
-                // Automatically select Podcast for Podcast Library.
                 typeSelect.value = 'podcast';
 
             } else {
@@ -854,10 +759,8 @@
             }
         }
 
-        // Preserve the current filter when the page loads.
         updateTypeOptions(false);
 
-        // Update content types when the selected track changes.
         trackSelect.addEventListener('change', function () {
             updateTypeOptions(true);
         });

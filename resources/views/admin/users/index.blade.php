@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', 'Mantiq - User Management')
 
-@section('content')
+@section('admin-content')
 
 <style>
     .users-section {
@@ -187,219 +187,116 @@
     }
 </style>
 
-<div class="admin-layout">
+<section class="users-section">
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
+    {{-- Statistics --}}
+    <div class="users-stats">
 
-        <div class="admin-brand">
-            <span class="brand-icon">M</span>
-            <span>MANTIQ</span>
+        <div class="users-stat-card">
+            <span>Total Registered Users</span>
+            <h2>{{ $totalUsers }}</h2>
         </div>
 
-        <div class="sidebar-section">
-            <p class="sidebar-label">MAIN MENU</p>
+    </div>
 
-            <a href="{{ route('admin.dashboard') }}"
-               class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <span>▦</span> Dashboard
-            </a>
+    {{-- Users Table --}}
+    <div class="users-table-card">
 
-            <a href="{{ route('admin.users.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <span>♙</span> Users
-            </a>
-
-            <a href="{{ route('admin.categories.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                <span>▤</span> Categories
-            </a>
-        </div>
-
-        <div class="sidebar-section">
-            <p class="sidebar-label">CONTENT MANAGEMENT</p>
-
-            <a href="{{ route('admin.contents.index', ['track' => 'tech']) }}"
-               class="sidebar-link">
-                <span>⌘</span> Tech Track
-            </a>
-
-            <a href="{{ route('admin.contents.index', ['track' => 'business']) }}"
-               class="sidebar-link">
-                <span>▣</span> B2B Route
-            </a>
-
-            <a href="{{ route('admin.contents.index', ['type' => 'podcast']) }}"
-               class="sidebar-link">
-                <span>♫</span> BuildCast
-            </a>
-
-            <a href="#" class="sidebar-link">
-                <span>◉</span> Community
-            </a>
-        </div>
-
-        <div class="sidebar-section">
-            <p class="sidebar-label">SYSTEM</p>
-
-            <a href="#" class="sidebar-link">
-                <span>♧</span> Notifications
-            </a>
-
-            <a href="#" class="sidebar-link">
-                <span>⚙</span> Settings
-            </a>
-        </div>
-
-        <div class="sidebar-bottom">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-
-                <button type="submit" class="sidebar-link logout-button">
-                    <span>↪</span> Logout
-                </button>
-            </form>
-        </div>
-
-    </aside>
-
-    <!-- Main Content -->
-    <main class="admin-main">
-
-        <!-- Header -->
-        <header class="admin-header">
+        <div class="users-table-heading">
 
             <div>
-                <h1>User Management</h1>
-                <p>Manage and view all registered users.</p>
+                <h2>Registered Users</h2>
+                <p>View all users registered on the platform.</p>
             </div>
 
-            <div class="admin-profile">
-                <div class="profile-avatar">M</div>
+            <a href="{{ route('admin.dashboard') }}"
+                class="users-back-button">
+                Back to Dashboard
+            </a>
 
-                <div>
-                    <strong>{{ auth()->user()->name }}</strong>
-                    <span>Administrator</span>
-                </div>
-            </div>
+        </div>
 
-        </header>
+        <div class="users-table-wrapper">
 
-        <!-- Users Content -->
-        <section class="users-section">
+            <table class="users-table">
 
-            <!-- Statistics -->
-            <div class="users-stats">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Email Address</th>
+                        <th>Role</th>
+                        <th>Joined Date</th>
+                    </tr>
+                </thead>
 
-                <div class="users-stat-card">
-                    <span>Total Registered Users</span>
-                    <h2>{{ $totalUsers }}</h2>
-                </div>
+                <tbody>
 
-            </div>
+                    @forelse($users as $user)
 
-            <!-- Users Table -->
-            <div class="users-table-card">
+                        <tr>
 
-                <div class="users-table-heading">
+                            <td>{{ $user->id }}</td>
 
-                    <div>
-                        <h2>Registered Users</h2>
-                        <p>View all users registered on the platform.</p>
-                    </div>
+                            <td>
+                                <div class="user-info">
 
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="users-back-button">
-                        ← Back to Dashboard
-                    </a>
+                                    <div class="user-avatar">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
 
-                </div>
+                                    <span class="user-name">
+                                        {{ $user->name }}
+                                    </span>
 
-                <div class="users-table-wrapper">
+                                </div>
+                            </td>
 
-                    <table class="users-table">
+                            <td>{{ $user->email }}</td>
 
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>User</th>
-                                <th>Email Address</th>
-                                <th>Role</th>
-                                <th>Joined Date</th>
-                            </tr>
-                        </thead>
+                            <td>
+                                @php
+                                    $roleName = $user->role?->name
+                                        ?? $user->role?->slug
+                                        ?? 'User';
 
-                        <tbody>
+                                    $roleClass = strtolower($user->role?->slug ?? 'user');
+                                @endphp
 
-                            @forelse($users as $user)
+                                <span class="user-role {{ $roleClass === 'admin' ? 'admin' : 'user' }}">
+                                    {{ $roleName }}
+                                </span>
+                            </td>
 
-                                <tr>
+                            <td>
+                                {{ $user->created_at?->format('d M Y') ?? '—' }}
+                            </td>
 
-                                    <td>{{ $user->id }}</td>
+                        </tr>
 
-                                    <td>
-                                        <div class="user-info">
+                    @empty
 
-                                            <div class="user-avatar">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </div>
+                        <tr>
+                            <td colspan="5" class="users-empty">
+                                No users found.
+                            </td>
+                        </tr>
 
-                                            <span class="user-name">
-                                                {{ $user->name }}
-                                            </span>
+                    @endforelse
 
-                                        </div>
-                                    </td>
+                </tbody>
 
-                                    <td>{{ $user->email }}</td>
+            </table>
 
-                                    <td>
-                                        @php
-                                            $roleName = $user->role?->name
-                                                ?? $user->role?->slug
-                                                ?? 'User';
+        </div>
 
-                                            $roleClass = strtolower($user->role?->slug ?? 'user');
-                                        @endphp
+        {{-- Pagination --}}
+        <div class="users-pagination">
+            {{ $users->links() }}
+        </div>
 
-                                        <span class="user-role {{ $roleClass === 'admin' ? 'admin' : 'user' }}">
-                                            {{ $roleName }}
-                                        </span>
-                                    </td>
+    </div>
 
-                                    <td>
-                                        {{ $user->created_at?->format('d M Y') ?? '—' }}
-                                    </td>
-
-                                </tr>
-
-                            @empty
-
-                                <tr>
-                                    <td colspan="5" class="users-empty">
-                                        No users found.
-                                    </td>
-                                </tr>
-
-                            @endforelse
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-                <!-- Pagination -->
-                <div class="users-pagination">
-                    {{ $users->links() }}
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-</div>
+</section>
 
 @endsection

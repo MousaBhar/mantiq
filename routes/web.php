@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\AuthController;
@@ -95,4 +96,13 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('contents', ContentController::class);
 
         Route::resource('contents.lessons', LessonController::class);
+        // Admin Profile
+        Route::get('/profile', [ProfileController::class, 'edit'])
+            ->name('profile.edit');
+
+        Route::put('/profile', [ProfileController::class, 'update'])
+            ->name('profile.update');
+
+        Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])
+            ->name('profile.avatar.update');
     });
