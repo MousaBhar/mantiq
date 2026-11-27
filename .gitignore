@@ -24,3 +24,8 @@ Homestead.yaml
 Thumbs.db
 /routes.zip
 /project-structure.txt
+
+# Local temporary and backup files
+/dockerignore
+/resources/views/admin/dashboard.blade.php.backup
+/e\ exec\ app\ php\ artisan\ migrate\ --seed\ --force

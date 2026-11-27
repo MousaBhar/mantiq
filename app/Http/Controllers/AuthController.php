@@ -99,7 +99,7 @@ class AuthController extends Controller
                     ]);
             }
 
-            if (!$googleUser->user['email_verified']) {
+            if (!($googleUser->user['email_verified'] ?? false)) {
                 return redirect()->route('login')
                     ->withErrors([
                         'email' => 'Your Google email address is not verified.',

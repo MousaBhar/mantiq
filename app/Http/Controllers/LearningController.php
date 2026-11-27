@@ -104,7 +104,12 @@ class LearningController extends Controller
                 ->pluck('lesson_id')
             : collect();
 
+        $certificate = ($user && $canView)
+            ? $user->certificates()->where('content_id', $content->id)->first()
+            : null;
+
         return view('learning.show', [
+            'certificate' => $certificate,
             'content' => $content,
             'isEnrolled' => $isEnrolled,
             'canView' => $canView,
@@ -126,19 +131,31 @@ class LearningController extends Controller
 
         abort_unless($lesson->content, 404);
 
-        abort_unless(
-            $contentAccess->canView(auth()->user(), $lesson->content),
-            403
-        );
+        $user = auth()->user();
+
+        abort_unless($contentAccess->canViewLesson($user, $lesson), 403);
 
         $isCompleted = $lesson->progressRecords()
             ->where('user_id', auth()->id())
             ->whereNotNull('completed_at')
             ->exists();
 
+        $siblings = $lesson->content->lessons()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'title', 'sort_order']);
+
+        $position = $siblings->search(fn ($l) => $l->id === $lesson->id);
+
         return view('learning.lesson', [
             'lesson' => $lesson,
             'isCompleted' => $isCompleted,
+            // Completing a lesson requires full course access, not just preview.
+            'canComplete' => $contentAccess->canView($user, $lesson->content),
+            'previousLesson' => $position > 0 ? $siblings[$position - 1] : null,
+            'nextLesson' => $position !== false ? $siblings->get($position + 1) : null,
+            'lessonNumber' => $position === false ? null : $position + 1,
+            'lessonTotal' => $siblings->count(),
         ]);
     }
 }

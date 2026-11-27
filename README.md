@@ -1,58 +1,96 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="public/images/brand/logo.svg" width="320" alt="Mantiq">
 </p>
 
-## About Laravel
+<p align="center"><strong>منصة منطق للتعلّم التقني والمهني</strong><br>Laravel 13 · Blade · Tailwind/Vite · Sanctum</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## المزايا
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| الميزة | الوصف |
+|---|---|
+| مساران تعليميان | تقني وإداري، مع بودكاست مستقل |
+| دروس غنية | فيديو مضمَّن (YouTube / Vimeo) + نص Markdown + درس معاينة مجاني + السابق/التالي |
+| تتبّع التقدّم | إكمال الدروس ونسب الإنجاز و«تابع التعلّم» في لوحة المتعلّم |
+| شهادات | تُصدر تلقائيًا عند إكمال كل دروس الدورة، قابلة للطباعة، وصفحة تحقق عامة `/certificates/verify/{code}` |
+| بحث | بحث في الدورات والدروس `/search` |
+| مرشد منطق | مساعد تعليمي عائم + صفحة كاملة `/assistant` يعرف كتالوج المنصة وتقدّم المتعلّم والدرس المفتوح |
+| API للتطبيق | كتالوج، بحث، تقدّم، ومحادثات المرشد عبر Sanctum |
+| الأمان | Rate limiting، ترويسات أمان، فحص صلاحيات الدروس المدفوعة، تعقيم محتوى Markdown |
+| الهوية | شعار، favicon، أيقونات PWA، ومعاينة رابط (Open Graph) |
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## التشغيل السريع (Docker)
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+docker compose up --build
+# افتح http://localhost:8080
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+حسابات تجريبية (تُنشأ لأن `MANTIQ_SEED_DEMO=true`):
 
-## Contributing
+| الدور | البريد | كلمة المرور |
+|---|---|---|
+| مدير | `admin@mantiq.test` | `password` |
+| متعلّم | `student@mantiq.test` | `password` |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+> **مهم:** عند الإطلاق الفعلي اجعل `MANTIQ_SEED_DEMO=false`، وحدّد `MANTIQ_ADMIN_EMAIL` ببريدك، وغيّر `DEMO_PASSWORD`.
 
-## Code of Conduct
+## التشغيل المحلي (بدون Docker)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+composer install
+cp .env.example .env && php artisan key:generate
+touch database/database.sqlite
+# فعّل المحتوى التجريبي (اختياري): MANTIQ_SEED_DEMO=true في .env
+php artisan migrate --seed
+npm install && npm run build      # أو npm run dev أثناء التطوير
+php artisan serve
+```
 
-## Security Vulnerabilities
+## مرشد منطق
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+يعمل فورًا دون أي مفتاح (`ASSISTANT_DRIVER=local`): يجيب من كتالوج المنصة ويقترح الدورات المناسبة.
+للحصول على إجابات مولَّدة اختر مزوّدًا في `.env`:
 
-## License
+```env
+# Anthropic
+ASSISTANT_DRIVER=anthropic
+ANTHROPIC_API_KEY=...
+ASSISTANT_MODEL=claude-sonnet-5-5
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# أو أي خدمة متوافقة مع OpenAI (OpenAI / Groq / Ollama ...)
+ASSISTANT_DRIVER=openai
+OPENAI_API_KEY=...
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o-mini
+```
+
+- إن فشل المزوّد لأي سبب يعود المرشد تلقائيًا للإجابة المحلية فلا يبقى المتعلّم بلا رد.
+- لا يُرسل محتوى درس مدفوع للمزوّد إلا إن كان للمستخدم صلاحية عليه.
+- الحد الافتراضي 20 رسالة/دقيقة لكل مستخدم (`ASSISTANT_RATE_LIMIT`).
+- لإضافة مزوّد جديد: نفّذ `App\Services\Assistant\Contracts\AssistantDriver` وسجّله في `AssistantService::driver()`.
+
+## API
+
+| الطريقة | المسار | ملاحظات |
+|---|---|---|
+| GET | `/api/contents?track=tech\|business` | الدورات المنشورة |
+| GET | `/api/contents/{id}` | تفاصيل ودروس (الفيديو حسب الصلاحية) |
+| GET | `/api/search?q=` | بحث |
+| GET | `/api/me/progress` | تقدّمي (Sanctum) |
+| POST | `/api/assistant/messages` | `message`, `conversation_id?`, `lesson_id?` (Sanctum) |
+| GET/DELETE | `/api/assistant/conversations[/{id}]` | سجل المحادثات (Sanctum) |
+
+بالإضافة إلى مسارات المصادقة وكلمة المرور (OTP) الموجودة سابقًا.
+
+## الاختبارات
+
+```bash
+php artisan test
+```
+
+## إدارة المحتوى
+
+من لوحة الإدارة `/admin` يمكنك لكل درس: رابط فيديو، نصًّا بصيغة Markdown، وتحديده «معاينة مجانية».
+فيديوهات العرض التجريبي مرتبطة بفيديوهات عامة من قناة freeCodeCamp على YouTube (مضمَّنة وليست مستضافة هنا).

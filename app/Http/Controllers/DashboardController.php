@@ -16,8 +16,34 @@ class DashboardController extends Controller
             ->orderByDesc('published_at')
             ->get();
 
+        $user = Auth::user();
+
+        // Courses the learner is enrolled in, with progress.
+        $continueLearning = $user->courseEnrollments()
+            ->with(['content' => fn ($q) => $q->withCount('lessons')])
+            ->latest('enrolled_at')
+            ->limit(4)
+            ->get()
+            ->filter(fn ($e) => $e->content && $e->content->status !== 'draft')
+            ->map(function ($e) use ($user) {
+                $total = $e->content->lessons_count;
+                $done = $total
+                    ? $user->lessonProgress()->whereNotNull('completed_at')
+                        ->whereIn('lesson_id', $e->content->lessons()->pluck('id'))->count()
+                    : 0;
+
+                return (object) [
+                    'content' => $e->content,
+                    'done' => $done,
+                    'total' => $total,
+                    'percent' => $total ? (int) round($done / $total * 100) : 0,
+                ];
+            })->values();
+
         return view('dashboard.index', [
-            'user' => Auth::user(),
+            'user' => $user,
+            'continueLearning' => $continueLearning,
+            'certificatesCount' => $user->certificates()->count(),
 
             // Technical courses
             'techContents' => $publishedContents

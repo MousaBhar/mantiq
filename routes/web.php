@@ -7,6 +7,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\CourseEnrollmentController;
+use App\Http\Controllers\AssistantController;
+use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\SearchController;
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -23,9 +26,11 @@ Route::get('/register', [AuthController::class, 'showRegister'])
     ->name('register');
 
 Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:10,1')
     ->name('register.submit');
 
 Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:10,1')
     ->name('login.submit');
 
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -51,6 +56,16 @@ Route::get('/contents/{content}', [LearningController::class, 'show'])
     ->name('learning.show');
 
 
+// Search & public certificate verification
+Route::get('/search', [SearchController::class, 'index'])
+    ->middleware('throttle:60,1')
+    ->name('search');
+
+Route::get('/certificates/verify/{code}', [CertificateController::class, 'verify'])
+    ->middleware('throttle:30,1')
+    ->name('certificates.verify');
+
+
 // Authenticated User Routes
 Route::middleware('auth')->group(function () {
 
@@ -71,6 +86,26 @@ Route::middleware('auth')->group(function () {
     Route::post('/contents/{content}/enroll', [CourseEnrollmentController::class, 'enroll'])
         ->whereNumber('content')
         ->name('learning.enroll');
+
+    // Mentor (assistant)
+    Route::get('/assistant', [AssistantController::class, 'index'])
+        ->name('assistant.index');
+    Route::post('/assistant/messages', [AssistantController::class, 'send'])
+        ->middleware('throttle:assistant')
+        ->name('assistant.send');
+    Route::get('/assistant/conversations/{conversation}', [AssistantController::class, 'show'])
+        ->whereNumber('conversation')
+        ->name('assistant.show');
+    Route::delete('/assistant/conversations/{conversation}', [AssistantController::class, 'destroy'])
+        ->whereNumber('conversation')
+        ->name('assistant.destroy');
+
+    // Certificates
+    Route::get('/certificates', [CertificateController::class, 'index'])
+        ->name('certificates.index');
+    Route::get('/certificates/{certificate}', [CertificateController::class, 'show'])
+        ->whereNumber('certificate')
+        ->name('certificates.show');
 
     // Lesson Progress
     Route::post('/lessons/{lesson}/complete', [LessonProgressController::class, 'complete'])

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Content;
+use App\Models\Lesson;
 use App\Models\User;
 
 class ContentAccess
@@ -45,6 +46,27 @@ class ContentAccess
 
         // Paid courses require an existing enrollment.
         return $this->isEnrolled($user, $content);
+    }
+
+    /**
+     * Determine whether a user can open a specific lesson.
+     * Free preview lessons of published courses are open to signed-in users.
+     */
+    public function canViewLesson(?User $user, Lesson $lesson): bool
+    {
+        $content = $lesson->content;
+
+        if (!$content) {
+            return false;
+        }
+
+        if ($user && $lesson->is_preview
+            && $content->type === 'course'
+            && $content->status === 'published') {
+            return true;
+        }
+
+        return $this->canView($user, $content);
     }
 
     /**

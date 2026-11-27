@@ -248,6 +248,32 @@
                 @enderror
             </div>
 
+            <div class="form-group">
+                <label for="video_url">Video URL (YouTube or Vimeo)</label>
+                <input type="url" id="video_url" name="video_url" value="{{ old('video_url') }}"
+                    placeholder="https://www.youtube.com/watch?v=...">
+                <small style="color:#898391;">Shown in an embedded player inside the lesson.</small>
+                @error('video_url')
+                    <small class="error-message">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="body">Lesson content (Markdown)</label>
+                <textarea id="body" name="body" rows="12" dir="auto"
+                    placeholder="## Title&#10;Write the lesson text here. Markdown is supported.">{{ old('body') }}</textarea>
+                @error('body')
+                    <small class="error-message">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" name="is_preview" value="1" {{ old('is_preview') ? 'checked' : '' }}>
+                    Free preview (any signed-in user can open this lesson)
+                </label>
+            </div>
+
             <div class="form-actions">
 
                 <a href="{{ route('admin.contents.lessons.index', $content) }}"

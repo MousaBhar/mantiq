@@ -53,9 +53,15 @@ class LessonController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'body' => ['nullable', 'string', 'max:50000'],
             'media_url' => ['nullable', 'url', 'max:255'],
+            'video_url' => ['nullable', 'url', 'max:255'],
+            'is_preview' => ['sometimes', 'boolean'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
         ]);
+
+        // Unchecked checkboxes are not submitted.
+        $validated['is_preview'] = $request->boolean('is_preview');
 
         $nextSortOrder = ($content->lessons()->max('sort_order') ?? 0) + 1;
 
@@ -110,9 +116,15 @@ class LessonController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'body' => ['nullable', 'string', 'max:50000'],
             'media_url' => ['nullable', 'url', 'max:255'],
+            'video_url' => ['nullable', 'url', 'max:255'],
+            'is_preview' => ['sometimes', 'boolean'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
         ]);
+
+        // Unchecked checkboxes are not submitted.
+        $validated['is_preview'] = $request->boolean('is_preview');
 
         $lesson->update($validated);
 

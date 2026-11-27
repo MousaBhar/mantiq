@@ -83,4 +83,25 @@ class User extends Authenticatable
     {
         return $this->hasMany(LessonProgress::class);
     }
+
+    /**
+     * User has many assistant conversations.
+     */
+    public function assistantConversations(): HasMany
+    {
+        return $this->hasMany(AssistantConversation::class);
+    }
+
+    /**
+     * User has many certificates.
+     */
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role?->slug === 'admin';
+    }
 }

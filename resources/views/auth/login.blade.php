@@ -7,7 +7,10 @@
 <main class="login-container">
 
     <!-- Logo -->
-    <div class="logo">Mantiq</div>
+    <div class="logo" style="display:flex;align-items:center;justify-content:center;gap:12px;">
+        <img src="{{ asset('images/brand/logo-mark.svg') }}" alt="" width="46" height="46">
+        <span>Mantiq</span>
+    </div>
 
     <!-- Page Title -->
     <section class="title">

@@ -110,6 +110,17 @@
 
                     @endif
 
+                    <!-- Certificate -->
+                    @if($certificate)
+                        <div style="margin-top: 22px; padding: 16px 18px; background: #f5eaf5; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <div>
+                                <strong style="color: #690069;">🎓 You earned a certificate</strong>
+                                <div style="color: #777; font-size: 13px; margin-top: 4px;">Code: {{ $certificate->code }}</div>
+                            </div>
+                            <a href="{{ route('certificates.show', $certificate) }}" class="learning-view-button">View certificate</a>
+                        </div>
+                    @endif
+
                     <!-- Course Enrollment -->
                     @if($isEnrolled)
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lesson;
+use App\Services\CertificateService;
 use App\Services\ContentAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class LessonProgressController extends Controller
     public function complete(
         Request $request,
         Lesson $lesson,
-        ContentAccess $contentAccess
+        ContentAccess $contentAccess,
+        CertificateService $certificates
     ): RedirectResponse {
         $user = $request->user();
 
@@ -44,8 +46,12 @@ class LessonProgressController extends Controller
             $progress->save();
         }
 
+        $certificate = $certificates->issueIfCompleted($user, $lesson->content);
+
         return redirect()
             ->route('learning.lessons.show', $lesson)
-            ->with('success', 'Lesson marked as completed successfully.');
+            ->with('success', $certificate
+                ? 'Congratulations! You completed the course and earned a certificate.'
+                : 'Lesson marked as completed successfully.');
     }
 }

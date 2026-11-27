@@ -6,7 +6,7 @@
 <div class="login-container">
 
     <div class="logo">
-        <h1>Mantiq</h1>
+        <h1 style="display:flex;align-items:center;justify-content:center;gap:12px;"><img src="{{ asset('images/brand/logo-mark.svg') }}" alt="" width="42" height="42"><span>Mantiq</span></h1>
     </div>
 
     <h2 class="title">Create Your Account</h2>

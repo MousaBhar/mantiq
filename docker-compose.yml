@@ -1,0 +1,36 @@
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: Mantiq
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY:?APP_KEY is required}
+      APP_URL: http://localhost:8080
+
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/database.sqlite
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: sync
+
+      MANTIQ_ADMIN_EMAIL: ${MANTIQ_ADMIN_EMAIL:-}
+      MANTIQ_SEED_DEMO: ${MANTIQ_SEED_DEMO:-false}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-}
+
+      ASSISTANT_DRIVER: ${ASSISTANT_DRIVER:-local}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: http://localhost:8080/auth/google/callback
+
+    volumes:
+      - mantiq_data:/data
+      - mantiq_storage:/var/www/html/storage
+
+volumes:
+  mantiq_data:
+  mantiq_storage:

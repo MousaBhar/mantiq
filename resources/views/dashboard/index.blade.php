@@ -328,6 +328,8 @@
 
         </section>
 
+        @include('dashboard.partials.continue')
+
 
         <!-- Learning Statistics -->
         <section>

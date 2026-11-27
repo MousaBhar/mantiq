@@ -2,7 +2,7 @@
 
     {{-- MANTIQ Logo: Click to return to Dashboard --}}
     <a href="{{ route('admin.dashboard') }}" class="admin-brand">
-        <span class="brand-icon">M</span>
+        <img src="{{ asset('images/brand/logo-mark.svg') }}" alt="" width="34" height="34" style="border-radius:9px;">
         <span>MANTIQ</span>
     </a>
 
